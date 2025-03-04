@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Шифратори</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+/* Shake animation for incorrect password */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.shake-animation {
+    animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* Password input styling */
+#password-input-a {
+    letter-spacing: 2px;
+    font-size: 18px;
+    box-shadow: 0 0 15px rgba(255, 165, 0, 0.2);
+    transition: all 0.5s ease;
+}
+
+#password-input-a:focus {
+    box-shadow: 0 0 20px rgba(255, 165, 0, 0.5);
+}
+
+#submit-password-a {
+    background-color: #3a3a3a;
+    position: relative;
+    overflow: hidden;
+}
+
+#submit-password-a:hover {
+    background-color: #ff9900;
+    box-shadow: 0 0 15px rgba(255, 153, 0, 0.5);
+}
+
+#password-screen-a {
+    animation: windowAppear 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Enhanced particle effects for successful login */
+.sparkle {
+    background: radial-gradient(circle, #fff 10%, rgba(255, 165, 0, 0.8) 30%, transparent 70%);
+    box-shadow: 0 0 10px rgba(255, 165, 0, 0.8);
+    z-index: 1000;
+}
+
+        body {
+            perspective: 1000px;
+            display: flex;
+            min-height: 100vh;
+            overflow: hidden;
+            background-color: #212121;
+            position: relative;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0;
+            animation: twinkle 5s infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1.5); }
+            100% { opacity: 0; transform: scale(0.5); }
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #fff, transparent);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10;
+            opacity: 0;
+        }
+
+        .left-column {
+            width: 20%;
+            height: 100vh;
+            background-color: #171717;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 0, 255, 0.5);
+            animation: pulseShadow 5s infinite alternate;
+            z-index: 1;
+        }
+
+        @keyframes pulseShadow {
+            0% { box-shadow: 0 0 15px rgba(0, 0, 255, 0.3); }
+            100% { box-shadow: 0 0 30px rgba(0, 0, 255, 0.7); }
+        }
+
+        .right-column {
+            width: 80%;
+            height: 100vh;
+            background-color: #212121;
+            overflow-y: auto;
+            transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            background: radial-gradient(ellipse at center, #212121 0%, #171717 100%);
+        }
+
+        .title {
+            color: #4285f4;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: glow 2s ease-in-out infinite alternate, floatTitle 6s ease-in-out infinite;
+            text-shadow: 0 0 10px rgba(66, 133, 244, 0.7),
+                         0 0 20px rgba(66, 133, 244, 0.5),
+                         0 0 30px rgba(66, 133, 244, 0.3);
+            position: relative;
+	    animation: titleFloat 4s ease-in-out infinite, 
+               colorShift 8s linear infinite,
+               textGlow 2s ease-in-out infinite;
+            transform-style: preserve-3d;
+            will-change: transform, text-shadow;
+
+        }
+
+        @keyframes floatTitle {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+	    0%, 100% { transform: translateY(0) rotate(-1deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px rgba(66, 133, 244, 0.7),
+                             0 0 20px rgba(66, 133, 244, 0.5),
+                             0 0 30px rgba(66, 133, 244, 0.3);
+            }
+            to {
+                text-shadow: 0 0 20px rgba(66, 133, 244, 0.9),
+                             0 0 30px rgba(66, 133, 244, 0.7),
+                             0 0 40px rgba(66, 133, 244, 0.5),
+                             0 0 50px rgba(66, 133, 244, 0.3);
+            }
+        }
+@keyframes colorShift {
+    0% { color: #4285f4; }
+    25% { color: #8a2be2; }
+    50% { color: #ff9900; }
+    75% { color: #00ff88; }
+    100% { color: #4285f4; }
+}
+@keyframes textGlow {
+    0%, 100% { text-shadow: 0 0 20px rgba(66, 133, 244, 0.8); }
+    50% { text-shadow: 0 0 40px rgba(66, 133, 244, 1), 
+                       0 0 60px rgba(66, 133, 244, 0.6); }
+}
+
+.quantum-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(circle, #fff 20%, rgba(255,255,255,0.3) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: quantum 3s infinite;
+    opacity: 0;
+}
+
+@keyframes quantum {
+    0% { 
+        opacity: 0;
+        transform: scale(0) translate(0, 0);
+    }
+    20% { 
+        opacity: 1;
+        transform: scale(1) translate(20px, -20px);
+    }
+    100% { 
+        opacity: 0;
+        transform: scale(0.2) translate(100px, -100px);
+    }
+}
+
+        .cipher-block {
+            will-change: transform, box-shadow;
+            background-color: #303030;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                        box-shadow 0.5s ease, 
+                        background-color 0.5s ease;
+            position: relative;
+            overflow: hidden;
+            animation: appear 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes appear {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .cipher-block:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .cipher-block:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .cipher-block:nth-child(4) {
+            animation-delay: 0.6s;
+        }
+
+        .cipher-block:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3), 0 0 15px rgba(66, 133, 244, 0.5);
+            background-color: #3a3a3a;
+        }
+
+        .cipher-block:hover::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+            animation: shine 1.5s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            20% { left: 100%; }
+            100% { left: 100%; }
+        }
+
+        .cipher-name {
+            color: white;
+            font-size: 16px;
+            padding-left: 10px;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .cipher-block:hover .cipher-name {
+            transform: scale(1.05);
+        }
+
+        .cipher-letter {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cipher-block:hover .cipher-letter {
+            transform: rotate(360deg) scale(1.2);
+        }
+
+        .letter-a {
+            background-color: rgba(255, 165, 0, 0.1);
+            color: orange;
+            box-shadow: 0 0 8px rgba(255, 165, 0, 0.5);
+            animation: pulseA 3s infinite alternate;
+        }
+
+        @keyframes pulseA {
+            0% { box-shadow: 0 0 8px rgba(255, 165, 0, 0.5); }
+            100% { box-shadow: 0 0 15px rgba(255, 165, 0, 0.8); }
+        }
+
+        .letter-b {
+            background-color: rgba(138, 43, 226, 0.1);
+            color: #8a2be2;
+            box-shadow: 0 0 8px rgba(138, 43, 226, 0.5);
+            animation: pulseB 3s infinite alternate;
+        }
+
+        @keyframes pulseB {
+            0% { box-shadow: 0 0 8px rgba(138, 43, 226, 0.5); }
+            100% { box-shadow: 0 0 15px rgba(138, 43, 226, 0.8); }
+        }
+
+        .letter-c {
+            background-color: rgba(0, 123, 255, 0.1);
+            color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+            animation: pulseC 3s infinite alternate;
+        }
+
+        @keyframes pulseC {
+            0% { box-shadow: 0 0 8px rgba(0, 123, 255, 0.5); }
+            100% { box-shadow: 0 0 15px rgba(0, 123, 255, 0.8); }
+        }
+
+        .future-text {
+            color: white;
+            text-align: center;
+            font-size: 24px;
+            margin-top: 50px;
+            animation: shine 3s ease-in-out infinite, float 6s ease-in-out infinite;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+            letter-spacing: 3px;
+        }
+
+        @keyframes shine {
+            0% { text-shadow: 0 0 5px rgba(255, 255, 255, 0.7); }
+            50% { text-shadow: 0 0 20px rgba(255, 255, 255, 1); }
+            100% { text-shadow: 0 0 5px rgba(255, 255, 255, 0.7); }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .cipher-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .cipher-window {
+            background-color: #303030;
+            border-radius: 12px;
+            padding: 30px;
+            width: 80%;
+            max-width: 700px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                        box-shadow 0.5s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            animation: windowAppear 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            opacity: 0;
+            transform: scale(0.8);
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes windowAppear {
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .cipher-window::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(transparent, rgba(255, 255, 255, 0.1), transparent 30%);
+            animation: rotate 10s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes rotate {
+            100% { transform: rotate(360deg); }
+        }
+
+        .cipher-a-window {
+            box-shadow: 0 0 20px rgba(255, 165, 0, 0.4);
+        }
+
+        .cipher-a-window:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(255, 165, 0, 0.6);
+        }
+
+        .cipher-b-window {
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.4);
+        }
+
+        .cipher-b-window:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(138, 43, 226, 0.6);
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 15px;
+            animation: slideIn 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        @keyframes slideIn {
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .input-group:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .input-group:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .input-group:nth-child(4) {
+            animation-delay: 0.3s;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: none;
+            background-color: #3a3a3a;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.5s ease;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .text-input:focus {
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3), inset 0 2px 5px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .text-input::placeholder {
+            color: #888;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .text-input:focus::placeholder {
+            opacity: 0.5;
+            transform: translateX(10px);
+        }
+
+        .buttons-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            background-color: #3a3a3a;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .button:hover::before {
+            left: 100%;
+        }
+
+        .button:hover {
+            transform: translateY(-4px);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button-a:hover {
+            background-color: #ff9900;
+            box-shadow: 0 0 15px rgba(255, 153, 0, 0.5);
+        }
+
+        .button-b:hover {
+            background-color: #8a2be2;
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+        }
+
+        .button-clear {
+            margin-top: 10px;
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+
+        .tab {
+            display: none;
+            position: relative;
+        }
+
+        .active-tab {
+            display: flex;
+        }
+
+        .toggle-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            animation: slideIn 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+            animation-delay: 0.2s;
+        }
+
+        .toggle-button {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            background-color: #3a3a3a;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .toggle-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .toggle-button:hover::before {
+            left: 100%;
+        }
+
+        .toggle-button.active-b {
+            background-color: #8a2be2;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.7);
+            transform: scale(1.05);
+        }
+
+        /* Particles */
+        .particles-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Glow effect for active tabs */
+        .tab.active-tab::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+            animation: glowPulse 4s infinite alternate;
+        }
+
+        @keyframes glowPulse {
+            0% { opacity: 0.1; }
+            100% { opacity: 0.4; }
+        }
+
+        /* Fairy Dust Effect */
+        @keyframes fairy {
+            0% { 
+                transform: translateY(0) scale(0.3); 
+                opacity: 0; 
+            }
+            50% { 
+                opacity: 0.8; 
+            }
+            100% { 
+                transform: translateY(-100px) scale(0); 
+                opacity: 0; 
+            }
+        }
+
+        /* Cipher transition animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); filter: blur(5px); }
+            to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-column">
+        <h1 class="title">ШИФРАТОРИ</h1>
+        <div class="cipher-block" id="cipher-a">
+            <span class="cipher-name">Шифратор</span>
+            <span class="cipher-letter letter-a">A</span>
+        </div>
+        <div class="cipher-block" id="cipher-b">
+            <span class="cipher-name">Шифратор</span>
+            <span class="cipher-letter letter-b">B</span>
+        </div>
+        <div class="cipher-block" id="cipher-c">
+            <span class="cipher-name">Шифратор</span>
+            <span class="cipher-letter letter-c">C</span>
+        </div>
+    </div>
+    <div class="right-column">
+        <!-- Password screen for Cipher A -->
+<div class="tab active-tab" id="tab-a">
+    <div class="cipher-content">
+        <div class="cipher-window cipher-a-window" id="password-screen-a">
+            <div class="input-group">
+                <input type="password" class="text-input" id="password-input-a" placeholder="Введіть пароль...">
+                <div class="buttons-row">
+                    <div></div>
+                    <button class="button button-a" id="submit-password-a">Ввести</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Original cipher content (will be hidden initially) -->
+        <div class="cipher-window cipher-a-window" id="cipher-content-a" style="display: none;">
+            <div class="input-group">
+                <input type="text" class="text-input" id="input-a" placeholder="Введіть текст...">
+                <div class="buttons-row">
+                    <div></div>
+                    <button class="button button-a" id="paste-a">Вставити</button>
+                </div>
+            </div>
+            <div class="input-group">
+                <input type="text" class="text-input" id="output-a" placeholder="Тут буде готовий текст..." readonly>
+                <div class="buttons-row">
+                    <div></div>
+                    <button class="button button-a" id="copy-a">Скопіювати</button>
+                </div>
+            </div>
+            <button class="button button-a button-clear" id="clear-a">Очистити</button>
+        </div>
+    </div>
+</div>
+        
+        <div class="tab" id="tab-b">
+    <div class="cipher-content">
+        <div class="cipher-window cipher-b-window">
+            <div class="input-group">
+                <input type="text" class="text-input" id="input-b" placeholder="Введіть текст...">
+                <div class="buttons-row">
+                    <div></div>
+                    <button class="button button-b" id="paste-b-text">Вставити</button>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" class="text-input" id="key-b" placeholder="Введіть ключ...">
+                <div class="buttons-row">
+                    <div></div>
+                    <button class="button button-b" id="paste-b-key">Вставити</button>
+                </div>
+            </div>
+            
+            <div class="toggle-buttons">
+                <button class="toggle-button active-b" id="encrypt-button">Шифрування</button>
+                <button class="toggle-button" id="decrypt-button">Розшифрування</button>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" class="text-input" id="output-b" placeholder="Тут буде готовий текст..." readonly>
+                <div class="buttons-row">
+                    <button class="button button-b" id="copy-b">Скопіювати</button>
+                </div>
+            </div>
+            
+            <button class="button button-b button-clear" id="clear-b">Очистити</button>
+        </div>
+    </div>
+</div>
+        
+        <div class="tab" id="tab-c">
+            <div class="cipher-content">
+                <div class="future-text">Далі буде...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+function processTextB(text, key, isEncryption) {
+    const dictMap = {
+        'А': '001', 'Б': '002', 'В': '003', 'Г': '004', 'Ґ': '005', 'Д': '006', 'Е': '007',
+        'Є': '008', 'Ж': '009', 'З': '010', 'И': '011', 'І': '012', 'Ї': '013', 'Й': '014',
+        'К': '015', 'Л': '016', 'М': '017', 'Н': '018', 'О': '019', 'П': '020', 'Р': '021',
+        'С': '022', 'Т': '023', 'У': '024', 'Ф': '025', 'Х': '026', 'Ц': '027', 'Ч': '028',
+        'Ш': '029', 'Щ': '030', 'Ь': '031', 'Ю': '032', 'Я': '033',
+        
+        'а': '034', 'б': '035', 'в': '036', 'г': '037', 'ґ': '038', 'д': '039', 'е': '040',
+        'є': '041', 'ж': '042', 'з': '043', 'и': '044', 'і': '045', 'ї': '046', 'й': '047',
+        'к': '048', 'л': '049', 'м': '050', 'н': '051', 'о': '052', 'п': '053', 'р': '054',
+        'с': '055', 'т': '056', 'у': '057', 'ф': '058', 'х': '059', 'ц': '060', 'ч': '061',
+        'ш': '062', 'щ': '063', 'ь': '064', 'ю': '065', 'я': '066',
+        
+        'A': '067', 'B': '068', 'C': '069', 'D': '070', 'E': '071', 'F': '072', 'G': '073',
+        'H': '074', 'I': '075', 'J': '076', 'K': '077', 'L': '078', 'M': '079', 'N': '080',
+        'O': '081', 'P': '082', 'Q': '083', 'R': '084', 'S': '085', 'T': '086', 'U': '087',
+        'V': '088', 'W': '089', 'X': '090', 'Y': '091', 'Z': '092',
+        
+        'a': '093', 'b': '094', 'c': '095', 'd': '096', 'e': '097', 'f': '098', 'g': '099',
+        'h': '100', 'i': '101', 'j': '102', 'k': '103', 'l': '104', 'm': '105', 'n': '106',
+        'o': '107', 'p': '108', 'q': '109', 'r': '110', 's': '111', 't': '112', 'u': '113',
+        'v': '114', 'w': '115', 'x': '116', 'y': '117', 'z': '118',
+        
+        ' ': '119', '.': '120', ',': '121', '!': '122', '?': '123', ':': '124',
+        ';': '125', '-': '126', '_': '127', '+': '128', '=': '129', '0': '130',
+        '1': '131', '2': '132', '3': '133', '4': '134', '5': '135', '6': '136',
+        '7': '137', '8': '138', '9': '139'
+    };
+    
+    const reverseDict = {};
+    for (const [char, value] of Object.entries(dictMap)) {
+        reverseDict[value] = char;
+    }
+    
+    if (!text || !key) return '';
+    
+    const textNums = [];
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (dictMap[char]) {
+            textNums.push(parseInt(dictMap[char]));
+        } else {
+            textNums.push(char.charCodeAt(0));
+        }
+    }
+    
+    const keyNums = [];
+    for (let i = 0; i < key.length; i++) {
+        const char = key[i];
+        if (dictMap[char]) {
+            keyNums.push(parseInt(dictMap[char]));
+        } else {
+            keyNums.push(char.charCodeAt(0));
+        }
+    }
+    
+
+    if (keyNums.length === 0) return '';
+    
+    const resultNums = [];
+    for (let i = 0; i < textNums.length; i++) {
+        const keyIndex = i % keyNums.length;
+        let resultNum;
+        
+        const maxCharCode = 139;
+        
+        if (isEncryption) {
+            resultNum = textNums[i] + keyNums[keyIndex];
+            
+            if (resultNum > maxCharCode) {
+                resultNum = resultNum % maxCharCode;
+                if (resultNum === 0) resultNum = maxCharCode;
+            }
+        } else {
+            resultNum = textNums[i] - keyNums[keyIndex];
+            
+            if (resultNum <= 0) {
+                resultNum = maxCharCode - (Math.abs(resultNum) % maxCharCode);
+                if (resultNum === maxCharCode && Math.abs(resultNum) % maxCharCode === 0) {
+                    resultNum = 1;
+                }
+            }
+        }
+        
+        resultNums.push(resultNum);
+    }
+    
+    let resultText = '';
+    for (let i = 0; i < resultNums.length; i++) {
+        const num = resultNums[i];
+        const numStr = num.toString().padStart(3, '0');
+        
+        if (reverseDict[numStr]) {
+            resultText += reverseDict[numStr];
+        } else {
+            resultText += String.fromCharCode(num);
+        }
+    }
+    
+    return resultText;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordScreenA = document.getElementById('password-screen-a');
+    const cipherContentA = document.getElementById('cipher-content-a');
+    const passwordInputA = document.getElementById('password-input-a');
+    const submitPasswordA = document.getElementById('submit-password-a');
+    
+
+    async function fetchPassword() {
+        try {
+
+            const part1 = atob("aHR0cHM6Ly9yYXcu");
+            const part2 = atob("Z2l0aHVidXNlcmNvbnRlbnQuY29tL0Rhbnlsb0tvYi9w");
+            const part3 = atob("YXNzd29yZC1zdG9yYWdlL21haW4vcGFzc3dvcmQudHh0");
+            
+
+            const url = part1 + part2 + part3;
+            
+
+            const request = new Request(url, {
+                method: 'GET',
+                cache: 'no-store',
+                credentials: 'omit',
+                referrerPolicy: 'no-referrer'
+            });
+
+            const response = await fetch(request);
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch data');
+            }
+            
+            return await response.text();
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            return null;
+        }
+    }
+    
+
+    submitPasswordA.addEventListener('click', async function() {
+        const correctPassword = await fetchPassword();
+        const enteredPassword = passwordInputA.value.trim();
+        
+        if (correctPassword && enteredPassword === correctPassword.trim()) {
+            passwordScreenA.style.display = 'none';
+            cipherContentA.style.display = 'flex';
+            cipherContentA.classList.add('fade-in');
+            
+
+            createSparkleEffect();
+        } else {
+
+            passwordInputA.classList.add('shake-animation');
+            setTimeout(() => {
+                passwordInputA.classList.remove('shake-animation');
+            }, 500);
+        }
+    });
+    
+    passwordInputA.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            submitPasswordA.click();
+        }
+    });
+    
+    function createSparkleEffect() {
+        for (let i = 0; i < 20; i++) {
+            const sparkle = document.createElement('div');
+            sparkle.classList.add('sparkle');
+            document.body.appendChild(sparkle);
+            
+            const size = Math.random() * 8 + 2;
+            const posX = Math.random() * window.innerWidth;
+            const posY = Math.random() * window.innerHeight;
+            
+            sparkle.style.width = `${size}px`;
+            sparkle.style.height = `${size}px`;
+            sparkle.style.left = `${posX}px`;
+            sparkle.style.top = `${posY}px`;
+            sparkle.style.opacity = '1';
+            
+            const animation = sparkle.animate([
+                { transform: 'scale(0)', opacity: 0 },
+                { transform: 'scale(1)', opacity: 1 },
+                { transform: 'scale(0)', opacity: 0 }
+            ], {
+                duration: 1000 + Math.random() * 1000,
+                easing: 'cubic-bezier(0.4, 0.0, 0.2, 1)'
+            });
+            
+            animation.onfinish = () => {
+                sparkle.remove();
+            };
+        }
+    }
+    document.getElementById('cipher-a').addEventListener('click', () => switchToTab('a'));
+    document.getElementById('cipher-b').addEventListener('click', () => switchToTab('b'));
+    document.getElementById('cipher-c').addEventListener('click', () => switchToTab('c'));
+    
+    const inputA = document.getElementById('input-a');
+    const outputA = document.getElementById('output-a');
+    
+    document.getElementById('paste-a').addEventListener('click', async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            inputA.value = text;
+            outputA.value = encryptTextA(text);
+        } catch (err) {
+            alert('Не вдалося отримати доступ до буфера обміну: ' + err);
+        }
+    });
+    
+    inputA.addEventListener('input', function() {
+        outputA.value = encryptTextA(this.value);
+    });
+    
+    document.getElementById('copy-a').addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(outputA.value);
+            const copyBtn = document.getElementById('copy-a');
+            copyBtn.textContent = 'Скопійовано!';
+            setTimeout(() => {
+                copyBtn.textContent = 'Скопіювати';
+            }, 2000);
+        } catch (err) {
+            alert('Не вдалося скопіювати текст: ' + err);
+        }
+    });
+    
+    document.getElementById('clear-a').addEventListener('click', () => {
+        inputA.value = '';
+        outputA.value = '';
+    });
+    
+    const inputB = document.getElementById('input-b');
+    const keyB = document.getElementById('key-b');
+    const outputB = document.getElementById('output-b');
+    const alternateBtn = document.getElementById('alternate-b');
+    let isEncryption = true;
+    let alternateMode = false;
+    
+    const encryptButton = document.getElementById('encrypt-button');
+    const decryptButton = document.getElementById('decrypt-button');
+    
+    alternateBtn.textContent = "Варіант попорядку.";
+    
+    alternateBtn.addEventListener('click', function() {
+        alternateMode = !alternateMode;
+        this.textContent = alternateMode ? "Варіант не попорядку." : "Варіант попорядку.";
+        updateOutput();
+    });
+    
+    encryptButton.addEventListener('click', function() {
+        isEncryption = true;
+        encryptButton.classList.add('active-b');
+        decryptButton.classList.remove('active-b');
+        updateOutput();
+    });
+    
+    decryptButton.addEventListener('click', function() {
+        isEncryption = false;
+        decryptButton.classList.add('active-b');
+        encryptButton.classList.remove('active-b');
+        updateOutput();
+    });
+    
+    function updateOutput() {
+        if (inputB.value && keyB.value) {
+            const standardResult = processTextB(inputB.value, keyB.value, isEncryption);
+            
+            if (alternateMode) {
+                outputB.value = standardResult.split('').reverse().join('');
+            } else {
+                outputB.value = standardResult;
+            }
+        } else {
+            outputB.value = '';
+        }
+    }
+    
+    inputB.addEventListener('input', updateOutput);
+    keyB.addEventListener('input', updateOutput);
+    
+    document.getElementById('paste-b-text').addEventListener('click', async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            inputB.value = text;
+            updateOutput();
+        } catch (err) {
+            alert('Не вдалося отримати доступ до буфера обміну: ' + err);
+        }
+    });
+    
+    document.getElementById('paste-b-key').addEventListener('click', async () => {
+        try {
+            const text = await navigator.clipboard.readText();
+            keyB.value = text;
+            updateOutput();
+        } catch (err) {
+            alert('Не вдалося отримати доступ до буфера обміну: ' + err);
+        }
+    });
+    
+    document.getElementById('copy-b').addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(outputB.value);
+            const copyBtn = document.getElementById('copy-b');
+            copyBtn.textContent = 'Скопійовано!';
+            setTimeout(() => {
+                copyBtn.textContent = 'Скопіювати';
+            }, 2000);
+        } catch (err) {
+            alert('Не вдалося скопіювати текст: ' + err);
+        }
+    });
+    
+    document.getElementById('clear-b').addEventListener('click', () => {
+        inputB.value = '';
+        keyB.value = '';
+        outputB.value = '';
+    });
+});
+
+function switchToTab(tabId) {
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active-tab');
+    });
+    
+    const targetTab = document.getElementById('tab-' + tabId);
+    targetTab.classList.add('active-tab');
+    targetTab.classList.add('fade-in');
+    
+    setTimeout(() => {
+        targetTab.classList.remove('fade-in');
+    }, 500);
+}
+
+function encryptTextA(text) {
+    const mapping = {
+        "А": "サ", "Б": "ニ", "В": "ﾐ", "Г": "り", "Д": "ち", "Е": "ペ", "Є": "ｨ", "Ж": "ポ",
+    "З": "ォ", "И": "ｼ", "І": "ᑑ", "Ї": "ᓵ", "Й": "し", "К": "ﾁ", "Л": "ョ", "М": "ッ", "Н": "レ",
+    "О": "ｬ", "П": "ナ", "Р": "ろ", "С": "ｲ", "Т": "ﾘ", "У": "ﾑ", "Ф": "･", "Х": "ュ", "Ц": "ビ",
+    "Ч": "ﾌ", "Ш": "ﾂ", "Щ": "ヌ", "Ь": "ﾛ", "Ю": "ﾞ", "Я": "ヴ", "а": "ꖎ", "б": "ゐ", "в": "ゖ",
+    "г": "ｦ", "д": "ᒲ", "е": "ヘ", "є": "ぷ", "ж": "ギ", "з": "シ", "и": "み", "і": "ぽ", "ї": "ﾏ",
+    "й": "フ", "к": "ヺ", "л": "ｻ", "м": "テ", "н": "カ", "о": "へ", "п": "パ", "р": "ｩ", "с": "ᒷ",
+    "т": "わ", "у": "ゅ", "ф": "ら", "х": "ぴ", "ц": "ﾀ", "ч": "‖", "ш": "ゑ", "щ": "ツ", "ь": "ァ",
+    "ю": "ャ", "я": "ヵ", "A": "ワ", "B": "ヮ", "C": "ユ", "D": "コ", "E": "か", "F": "ネ", "G": "げ",
+    "H": "ぶ", "I": "べ", "J": "リ", "K": "ね", "L": "ト", "M": "ぇ", "N": "!", "O": "ﾋ", "P": "ﾝ",
+    "Q": "ゲ", "R": "ざ", "S": "∴", "T": "び", "U": "ガ", "V": "す", "W": "ど", "X": "ｪ", "Y": "ﾆ",
+    "Z": "イ", "a": "ま", "b": "ゃ", "c": "ゥ", "d": "く", "e": "ゆ", "f": "タ", "g": "⍊", "h": "ほ",
+    "i": "グ", "j": "は", "k": "ｵ", "l": "⚍", "m": "プ", "n": "↸", "o": "ザ", "p": "ズ", "q": "ぢ",
+    "r": "ダ", "s": "キ", "t": "ゼ", "v": "ロ", "w": "ﾜ", "x": "ﾅ", "y": "┫", "z": "ぎ",
+    "0": "ヂ", "1": "ベ", "2": "ゞ", "3": "ﾍ", "4": "ぬ", "5": "ﾙ", "6": "マ", "7": "⎓", "8": "バ",
+    "9": "セ", "!": "だ", "@": "ム", "#": "い", "$": "え", "%": "￤", "^": "ヤ", "&": "お", "*": "そ",
+    "(": "ﾊ", ")": "ケ", "-": "ᓭ", "_": "の", "=": "ぺ", "+": "ぐ", "?": "ꖌ", "/": "ｱ",
+    ".": "ば", ",": "メ", "<": "ソ", ">": "ゾ", "~": "⋮", "\"": "ﾖ", "'": "ﾒ",
+    "サ": "А", "ニ": "Б", "ﾐ": "В", "り": "Г", "ち": "Д", "ペ": "Е", "ｨ": "Є", "ポ": "Ж",
+    "ォ": "З", "ｼ": "И", "ᑑ": "І", "ᓵ": "Ї", "し": "Й", "ﾁ": "К", "ョ": "Л", "ッ": "М", "レ": "Н",
+    "ｬ": "О", "ナ": "П", "ろ": "Р", "ｲ": "С", "ﾘ": "Т", "ﾑ": "У", "･": "Ф", "ュ": "Х", "ビ": "Ц",
+    "ﾌ": "Ч", "ﾂ": "Ш", "ヌ": "Щ", "ﾛ": "Ь", "ﾞ": "Ю", "ヴ": "Я", "ꖎ": "а", "ゐ": "б", "ゖ": "в",
+    "ｦ": "г", "ᒲ": "д", "ヘ": "е", "ぷ": "є", "ギ": "ж", "シ": "з", "み": "и", "ぽ": "і", "ﾏ": "ї",
+    "フ": "й", "ヺ": "к", "ｻ": "л", "テ": "м", "カ": "н", "へ": "о", "パ": "п", "ｩ": "р", "ᒷ": "с",
+    "わ": "т", "ゅ": "у", "ら": "ф", "ぴ": "х", "ﾀ": "ц", "‖": "ч", "ゑ": "ш", "ツ": "щ", "ァ": "ь",
+    "ャ": "ю", "ヵ": "я", "ワ": "A", "ヮ": "B", "ユ": "C", "コ": "D", "か": "E", "ネ": "F", "げ": "G",
+    "ぶ": "H", "べ": "I", "リ": "J", "ね": "K", "ト": "L", "ぇ": "M", "!": "N", "ﾋ": "O", "ﾝ": "P",
+    "ゲ": "Q", "ざ": "R", "∴": "S", "び": "T", "ガ": "U", "す": "V", "ど": "W", "ｪ": "X", "ﾆ": "Y",
+    "イ": "Z", "ま": "a", "ゃ": "b", "ゥ": "c", "く": "d", "ゆ": "e", "タ": "f", "⍊": "g", "ほ": "h",
+    "グ": "i", "は": "j", "ｵ": "k", "⚍": "l", "プ": "m", "↸": "n", "ザ": "o", "ズ": "p", "ぢ": "q",
+    "ダ": "r", "キ": "s", "ゼ": "t", "ロ": "v", "ﾜ": "w", "ﾅ": "x", "┫": "y", "ぎ": "z",
+    "ヂ": "0", "ベ": "1", "ゞ": "2", "ﾍ": "3", "ぬ": "4", "ﾙ": "5", "マ": "6", "⎓": "7", "バ": "8",
+    "セ": "9", "だ": "!", "ム": "@", "い": "#", "え": "$", "￤": "%", "ヤ": "^", "お": "&", "そ": "*",
+    "ﾊ": "(", "ケ": ")", "ᓭ": "-", "の": "_", "ぺ": "=", "ぐ": "+", "ꖌ": "?", "ｱ": "/",
+    "ば": ".", "メ": ",", "ソ": "<", "ゾ": ">", "⋮": "~", "ﾖ": "\"", "ﾒ": "'"
+    };
+    
+    return text.split('').map(char => mapping[char] || char).join('');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    createStars();
+    setupCipherTabs();
+    setupCipherA();
+    setupCipherB();
+    addSparkleEffect();
+});
+
+function createStars() {
+    const container = document.body;
+    const numStars = 20;
+    
+    for (let i = 0; i < numStars; i++) {
+        const star = document.createElement('div');
+        star.className = Math.random() > 0.5 ? 'star' : 'quantum-particle';
+        star.style.left = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
+        star.style.animationDelay = `${Math.random() * 1}s`;
+        star.style.animationDuration = `${5 + Math.random() * 1}s`;
+        container.appendChild(star);
+    }
+    
+    setInterval(() => {
+        const particles = document.querySelectorAll('.star, .quantum-particle');
+        particles.forEach(p => {
+            if(Math.random() > 0.8) p.remove();
+        });
+        createStars();
+    }, 5000);
+}
+
+function addSparkleEffect() {
+    document.addEventListener('mousemove', function(e) {
+        if (Math.random() > 0.9) {
+            const sparkle = document.createElement('div');
+            sparkle.className = 'sparkle';
+            sparkle.style.left = `${e.pageX}px`;
+            sparkle.style.top = `${e.pageY}px`;
+            
+            document.body.appendChild(sparkle);
+            
+            sparkle.style.animation = `fairy 2s forwards`;
+            sparkle.style.opacity = '1';
+            
+            setTimeout(() => {
+                sparkle.remove();
+            }, 2000);
+        }
+    });
+}
+
+function setupCipherTabs() {
+    const cipherA = document.getElementById('cipher-a');
+    const cipherB = document.getElementById('cipher-b');
+    const cipherC = document.getElementById('cipher-c');
+    
+    const tabA = document.getElementById('tab-a');
+    const tabB = document.getElementById('tab-b');
+    const tabC = document.getElementById('tab-c');
+    
+    cipherA.addEventListener('click', function() {
+        tabA.classList.add('active-tab');
+        tabB.classList.remove('active-tab');
+        tabC.classList.remove('active-tab');
+        
+        // Add fade-in animation
+        tabA.classList.add('fade-in');
+        setTimeout(() => {
+            tabA.classList.remove('fade-in');
+        }, 700);
+    });
+    
+    cipherB.addEventListener('click', function() {
+        tabA.classList.remove('active-tab');
+        tabB.classList.add('active-tab');
+        tabC.classList.remove('active-tab');
+        
+        // Add fade-in animation
+        tabB.classList.add('fade-in');
+        setTimeout(() => {
+            tabB.classList.remove('fade-in');
+        }, 700);
+    });
+    
+    cipherC.addEventListener('click', function() {
+        tabA.classList.remove('active-tab');
+        tabB.classList.remove('active-tab');
+        tabC.classList.add('active-tab');
+        
+        // Add fade-in animation
+        tabC.classList.add('fade-in');
+        setTimeout(() => {
+            tabC.classList.remove('fade-in');
+        }, 700);
+    });
+}
+
+// Cipher A: Text to hieroglyphs mapping
+function setupCipherA() {
+    const inputA = document.getElementById('input-a');
+    const outputA = document.getElementById('output-a');
+    const copyBtnA = document.getElementById('copy-a');
+    const clearBtnA = document.getElementById('clear-a');
+    const pasteBtnA = document.getElementById('paste-a');
+    
+    const hieroglyphMap = {
+        "А": "サ", "Б": "ニ", "В": "ﾐ", "Г": "り", "Д": "ち", "Е": "ペ", "Є": "ｨ", "Ж": "ポ",
+    "З": "ォ", "И": "ｼ", "І": "ᑑ", "Ї": "ᓵ", "Й": "し", "К": "ﾁ", "Л": "ョ", "М": "ッ", "Н": "レ",
+    "О": "ｬ", "П": "ナ", "Р": "ろ", "С": "ｲ", "Т": "ﾘ", "У": "ﾑ", "Ф": "･", "Х": "ュ", "Ц": "ビ",
+    "Ч": "ﾌ", "Ш": "ﾂ", "Щ": "ヌ", "Ь": "ﾛ", "Ю": "ﾞ", "Я": "ヴ", "а": "ꖎ", "б": "ゐ", "в": "ゖ",
+    "г": "ｦ", "д": "ᒲ", "е": "ヘ", "є": "ぷ", "ж": "ギ", "з": "シ", "и": "み", "і": "ぽ", "ї": "ﾏ",
+    "й": "フ", "к": "ヺ", "л": "ｻ", "м": "テ", "н": "カ", "о": "へ", "п": "パ", "р": "ｩ", "с": "ᒷ",
+    "т": "わ", "у": "ゅ", "ф": "ら", "х": "ぴ", "ц": "ﾀ", "ч": "‖", "ш": "ゑ", "щ": "ツ", "ь": "ァ",
+    "ю": "ャ", "я": "ヵ", "A": "ワ", "B": "ヮ", "C": "ユ", "D": "コ", "E": "か", "F": "ネ", "G": "げ",
+    "H": "ぶ", "I": "べ", "J": "リ", "K": "ね", "L": "ト", "M": "ぇ", "N": "!", "O": "ﾋ", "P": "ﾝ",
+    "Q": "ゲ", "R": "ざ", "S": "∴", "T": "び", "U": "ガ", "V": "す", "W": "ど", "X": "ｪ", "Y": "ﾆ",
+    "Z": "イ", "a": "ま", "b": "ゃ", "c": "ゥ", "d": "く", "e": "ゆ", "f": "タ", "g": "⍊", "h": "ほ",
+    "i": "グ", "j": "は", "k": "ｵ", "l": "⚍", "m": "プ", "n": "↸", "o": "ザ", "p": "ズ", "q": "ぢ",
+    "r": "ダ", "s": "キ", "t": "ゼ", "v": "ロ", "w": "ﾜ", "x": "ﾅ", "y": "┫", "z": "ぎ",
+    "0": "ヂ", "1": "ベ", "2": "ゞ", "3": "ﾍ", "4": "ぬ", "5": "ﾙ", "6": "マ", "7": "⎓", "8": "バ",
+    "9": "セ", "!": "だ", "@": "ム", "#": "い", "$": "え", "%": "￤", "^": "ヤ", "&": "お", "*": "そ",
+    "(": "ﾊ", ")": "ケ", "-": "ᓭ", "_": "の", "=": "ぺ", "+": "ぐ", "?": "ꖌ", "/": "ｱ",
+    ".": "ば", ",": "メ", "<": "ソ", ">": "ゾ", "~": "⋮", "\"": "ﾖ", "'": "ﾒ",
+    
+    "サ": "А", "ニ": "Б", "ﾐ": "В", "り": "Г", "ち": "Д", "ペ": "Е", "ｨ": "Є", "ポ": "Ж",
+    "ォ": "З", "ｼ": "И", "ᑑ": "І", "ᓵ": "Ї", "し": "Й", "ﾁ": "К", "ョ": "Л", "ッ": "М", "レ": "Н",
+    "ｬ": "О", "ナ": "П", "ろ": "Р", "ｲ": "С", "ﾘ": "Т", "ﾑ": "У", "･": "Ф", "ュ": "Х", "ビ": "Ц",
+    "ﾌ": "Ч", "ﾂ": "Ш", "ヌ": "Щ", "ﾛ": "Ь", "ﾞ": "Ю", "ヴ": "Я", "ꖎ": "а", "ゐ": "б", "ゖ": "в",
+    "ｦ": "г", "ᒲ": "д", "ヘ": "е", "ぷ": "є", "ギ": "ж", "シ": "з", "み": "и", "ぽ": "і", "ﾏ": "ї",
+    "フ": "й", "ヺ": "к", "ｻ": "л", "テ": "м", "カ": "н", "へ": "о", "パ": "п", "ｩ": "р", "ᒷ": "с",
+    "わ": "т", "ゅ": "у", "ら": "ф", "ぴ": "х", "ﾀ": "ц", "‖": "ч", "ゑ": "ш", "ツ": "щ", "ァ": "ь",
+    "ャ": "ю", "ヵ": "я", "ワ": "A", "ヮ": "B", "ユ": "C", "コ": "D", "か": "E", "ネ": "F", "げ": "G",
+    "ぶ": "H", "べ": "I", "リ": "J", "ね": "K", "ト": "L", "ぇ": "M", "!": "N", "ﾋ": "O", "ﾝ": "P",
+    "ゲ": "Q", "ざ": "R", "∴": "S", "び": "T", "ガ": "U", "す": "V", "ど": "W", "ｪ": "X", "ﾆ": "Y",
+    "イ": "Z", "ま": "a", "ゃ": "b", "ゥ": "c", "く": "d", "ゆ": "e", "タ": "f", "⍊": "g", "ほ": "h",
+    "グ": "i", "は": "j", "ｵ": "k", "⚍": "l", "プ": "m", "↸": "n", "ザ": "o", "ズ": "p", "ぢ": "q",
+    "ダ": "r", "キ": "s", "ゼ": "t", "ロ": "v", "ﾜ": "w", "ﾅ": "x", "┫": "y", "ぎ": "z",
+    "ヂ": "0", "ベ": "1", "ゞ": "2", "ﾍ": "3", "ぬ": "4", "ﾙ": "5", "マ": "6", "⎓": "7", "バ": "8",
+    "セ": "9", "だ": "!", "ム": "@", "い": "#", "え": "$", "￤": "%", "ヤ": "^", "お": "&", "そ": "*",
+    "ﾊ": "(", "ケ": ")", "ᓭ": "-", "の": "_", "ぺ": "=", "ぐ": "+", "ꖌ": "?", "ｱ": "/",
+    "ば": ".", "メ": ",", "ソ": "<", "ゾ": ">", "⋮": "~", "ﾖ": "\"", "ﾒ": "'"
+    };
+    
+    inputA.addEventListener('input', function() {
+        let result = '';
+        for (let i = 0; i < this.value.length; i++) {
+            const char = this.value[i];
+            result += hieroglyphMap[char] || char;
+        }
+        outputA.value = result;
+    });
+    
+    copyBtnA.addEventListener('click', function() {
+        outputA.select();
+        document.execCommand('copy');
+        
+        // Visual feedback
+        this.textContent = 'Скопійовано!';
+        setTimeout(() => {
+            this.textContent = 'Скопіювати';
+        }, 1500);
+    });
+    
+    clearBtnA.addEventListener('click', function() {
+        inputA.value = '';
+        outputA.value = '';
+    });
+    
+    pasteBtnA.addEventListener('click', async function() {
+        try {
+            const text = await navigator.clipboard.readText();
+            inputA.value = text;
+            // Trigger the input event to process the pasted text
+            const event = new Event('input');
+            inputA.dispatchEvent(event);
+        } catch (err) {
+            console.error('Failed to read clipboard contents: ', err);
+        }
+    });
+}
+
+// Cipher B: Number-based encryption with key
+function setupCipherB() {
+    const inputB = document.getElementById('input-b');
+    const keyB = document.getElementById('key-b');
+    const outputB = document.getElementById('output-b');
+    const copyBtnB = document.getElementById('copy-b');
+    const clearBtnB = document.getElementById('clear-b');
+    const pasteBtnText = document.getElementById('paste-b-text');
+    const pasteBtnKey = document.getElementById('paste-b-key');
+    const encryptBtn = document.getElementById('encrypt-button');
+    const decryptBtn = document.getElementById('decrypt-button');
+    const alternateBtn = document.getElementById('alternate-b');
+    
+    let isEncrypting = true;
+    
+    // Character to number mapping
+    const charToNum = {};
+    const numToChar = {};
+    
+    // Ukrainian uppercase (001-033)
+    const ukrUppercase = 'АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ';
+    for (let i = 0; i < ukrUppercase.length; i++) {
+        const num = i + 1;
+        const formattedNum = num.toString().padStart(3, '0');
+        charToNum[ukrUppercase[i]] = formattedNum;
+        numToChar[formattedNum] = ukrUppercase[i];
+    }
+    
+    // Ukrainian lowercase (034-066)
+    const ukrLowercase = 'абвгґдеєжзиіїйклмнопрстуфхцчшщьюя';
+    for (let i = 0; i < ukrLowercase.length; i++) {
+        const num = i + 34;
+        const formattedNum = num.toString().padStart(3, '0');
+        charToNum[ukrLowercase[i]] = formattedNum;
+        numToChar[formattedNum] = ukrLowercase[i];
+    }
+    
+    // English uppercase (067-092)
+    const engUppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    for (let i = 0; i < engUppercase.length; i++) {
+        const num = i + 67;
+        const formattedNum = num.toString().padStart(3, '0');
+        charToNum[engUppercase[i]] = formattedNum;
+        numToChar[formattedNum] = engUppercase[i];
+    }
+    
+    // English lowercase (093-118)
+    const engLowercase = 'abcdefghijklmnopqrstuvwxyz';
+    for (let i = 0; i < engLowercase.length; i++) {
+        const num = i + 93;
+        const formattedNum = num.toString().padStart(3, '0');
+        charToNum[engLowercase[i]] = formattedNum;
+        numToChar[formattedNum] = engLowercase[i];
+    }
+    
+    // Additional symbols (119-150)
+    const symbols = '0123456789 .,:;!?@#$%^&*()-_=+[]{}|\\/<>~`"\'';
+    for (let i = 0; i < symbols.length; i++) {
+        const num = i + 119;
+        const formattedNum = num.toString().padStart(3, '0');
+        charToNum[symbols[i]] = formattedNum;
+        numToChar[formattedNum] = symbols[i];
+    }
+    
+    // Maximum character code
+    const maxCode = 150;
+    
+    function processInput() {
+        if (!inputB.value || !keyB.value) {
+            outputB.value = '';
+            return;
+        }
+        
+        const input = inputB.value;
+        const key = keyB.value;
+        
+        let result = '';
+        let keyIndex = 0;
+        
+        for (let i = 0; i < input.length; i++) {
+            const char = input[i];
+            if (!charToNum[char]) {
+                result += char;
+                continue;
+            }
+            
+            // Get key character and wrap around if needed
+            const keyChar = key[keyIndex % key.length];
+            keyIndex++;
+            
+            if (!charToNum[keyChar]) {
+                continue;
+            }
+            
+            const inputNum = parseInt(charToNum[char]);
+            const keyNum = parseInt(charToNum[keyChar]);
+            
+            let resultNum;
+            
+            if (isEncrypting) {
+                resultNum = (inputNum + keyNum) % maxCode;
+                if (resultNum === 0) resultNum = maxCode;
+            } else {
+                resultNum = (inputNum - keyNum);
+                if (resultNum <= 0) resultNum = maxCode + resultNum;
+            }
+            
+            const formattedResultNum = resultNum.toString().padStart(3, '0');
+            result += numToChar[formattedResultNum] || char;
+        }
+        
+        outputB.value = result;
+    }
+    
+    function processAlternate() {
+        if (!inputB.value) {
+            outputB.value = '';
+            return;
+        }
+        
+        const input = inputB.value;
+        let result = '';
+        
+        for (let i = 0; i < input.length; i++) {
+            const char = input[i];
+            if (charToNum[char]) {
+                result += charToNum[char] + ' ';
+            } else {
+                result += char;
+            }
+        }
+        
+        outputB.value = result.trim();
+    }
+    
+    inputB.addEventListener('input', processInput);
+    keyB.addEventListener('input', processInput);
+    
+    encryptBtn.addEventListener('click', function() {
+        if (!this.classList.contains('active-b')) {
+            this.classList.add('active-b');
+            decryptBtn.classList.remove('active-b');
+            isEncrypting = true;
+            processInput();
+        }
+    });
+    
+    decryptBtn.addEventListener('click', function() {
+        if (!this.classList.contains('active-b')) {
+            this.classList.add('active-b');
+            encryptBtn.classList.remove('active-b');
+            isEncrypting = false;
+            processInput();
+        }
+    });
+    
+    copyBtnB.addEventListener('click', function() {
+        outputB.select();
+        document.execCommand('copy');
+        
+        // Visual feedback
+        this.textContent = 'Скопійовано!';
+        setTimeout(() => {
+            this.textContent = 'Скопіювати';
+        }, 1500);
+    });
+    
+    clearBtnB.addEventListener('click', function() {
+        inputB.value = '';
+        keyB.value = '';
+        outputB.value = '';
+    });
+    
+    alternateBtn.addEventListener('click', processAlternate);
+    
+    pasteBtnText.addEventListener('click', async function() {
+        try {
+            const text = await navigator.clipboard.readText();
+            inputB.value = text;
+            processInput();
+        } catch (err) {
+            console.error('Failed to read clipboard contents: ', err);
+        }
+    });
+    
+    pasteBtnKey.addEventListener('click', async function() {
+        try {
+            const text = await navigator.clipboard.readText();
+            keyB.value = text;
+            processInput();
+        } catch (err) {
+            console.error('Failed to read clipboard contents: ', err);
+        }
+    });
+}
+    </script>
+
+
